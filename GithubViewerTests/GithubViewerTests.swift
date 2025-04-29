@@ -1,0 +1,16 @@
+//
+//  GithubViewerTests.swift
+//  GithubViewerTests
+//
+//  Created by Bruce Evans on 2025/04/29.
+//
+
+import Testing
+
+struct GithubViewerTests {
+
+    @Test func example() async throws {
+        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+    }
+
+}
