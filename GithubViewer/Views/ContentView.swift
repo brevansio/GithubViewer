@@ -10,12 +10,16 @@ import SwiftUI
 struct ContentView: View {
     @State var authenticationModel = AuthenticationModel()
     
+    @State private var showAuthenticationPopup: Bool = false
+    
     var body: some View {
         switch authenticationModel {
         case .none:
-            Text("Not Logged in")
+            AuthenticationInputView { newModel in
+                authenticationModel = newModel
+            }
         case .some(let token):
-            Text("Logged in")
+            Text("Logged in with \(token)")
         }
     }
 }

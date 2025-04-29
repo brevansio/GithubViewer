@@ -38,7 +38,7 @@ struct AuthenticationModel {
             ] as CFDictionary
             
             var tokenDataReference: CFTypeRef?
-            let storedToken = SecItemCopyMatching(query, &tokenDataReference)
+            SecItemCopyMatching(query, &tokenDataReference) // FIXME: Validate the status. Low priority/risk here, but relates to UX
             
             guard let tokenData = tokenDataReference as? Data,
                   let token = String(data: tokenData, encoding: .utf8) else { return nil }
