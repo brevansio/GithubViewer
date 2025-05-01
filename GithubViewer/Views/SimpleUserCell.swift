@@ -1,0 +1,28 @@
+//
+//  SimpleUserCell.swift
+//  GithubViewer
+//
+//  Created by Bruce Evans on 2025/05/01.
+//
+
+import SwiftUI
+
+struct SimpleUserCell: View {
+    @State var user: SimpleUser
+    
+    var body: some View {
+        HStack {
+            AsyncImage(url: user.icon)
+                .frame(width: 44, height: 44)
+                .cornerRadius(22)
+            Text(user.username)
+                .font(.headline)
+            Spacer()
+        }
+        .padding(.horizontal)
+    }
+}
+
+#Preview {
+    SimpleUserCell(user: SimpleUser(icon: URL("https://avatars.githubusercontent.com/u/1?v=4")!, username: "mojombo", id: 1))
+}

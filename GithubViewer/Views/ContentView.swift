@@ -16,12 +16,11 @@ struct ContentView: View {
             AuthenticationInputView { newModel in
                 authenticationModel = newModel
             }
-        case .some(let model):
-            ProgressView()
-                .foregroundStyle(.primary)
-                .padding()
-                .background(.tertiary)
-                .cornerRadius(15)
+        case .some(let token):
+            NavigationView {
+                UserListView(authenticationToken: token)
+                    .navigationTitle("User List")
+            }
         }
     }
 }
