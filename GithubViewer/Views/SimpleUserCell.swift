@@ -12,7 +12,7 @@ struct SimpleUserCell: View {
     
     var body: some View {
         HStack {
-            AsyncImage(url: user.icon)
+            AvatarView(url: user.icon)
                 .frame(width: 44, height: 44)
                 .cornerRadius(22)
             Text(user.username)
@@ -23,6 +23,8 @@ struct SimpleUserCell: View {
     }
 }
 
+
 #Preview {
     SimpleUserCell(user: SimpleUser(icon: URL("https://avatars.githubusercontent.com/u/1?v=4")!, username: "mojombo", id: 1))
 }
+
