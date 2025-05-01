@@ -15,10 +15,15 @@ struct UserListView: View {
     var body: some View {
         switch status {
         case .loading:
-            ProgressView()
-                .onAppear {
-                    Task { await populateUsers() }
+            List {
+                ForEach(0..<20) { fakeId in
+                    SimpleUserCell(user: .init(icon: URL("https://google.com")!, username: "username", id: fakeId))
+                        .redacted(reason: .placeholder)
                 }
+            }
+            .onAppear {
+                Task { await populateUsers() }
+            }
         case .loaded(let users):
             List(users) { user in
                 NavigationLink(destination: UserDetailView()) {
