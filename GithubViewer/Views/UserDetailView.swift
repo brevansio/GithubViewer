@@ -5,14 +5,53 @@
 //  Created by Bruce Evans on 2025/05/01.
 //
 
+import SafariServices
 import SwiftUI
 
 struct UserDetailView: View {
+    let user: SimpleUser
+    let token: AuthenticationModel
+    
+    @State var status = LoadingStatus<[Repository]>.loading
+    
     var body: some View {
-        Text("Hello, World!")
+        UserCardView(user: user, token: token)
+        Spacer()
+        List {
+            switch status {
+            case .loading:
+                ProgressView()
+                // TODO: PlaceHolder
+            case .loaded(let respositoryList):
+                ForEach(respositoryList) { repository in
+                    NavigationLink {
+                        SafariView(url: repository.url)
+                            .ignoresSafeArea()
+                    } label: {
+                        RepositoryCell(repository: repository)
+                    }
+                }
+            case .failed:
+                Text("Failed")
+            }
+        }
+        .onAppear {
+            Task {
+                await fetchRepositories()
+            }
+        }
+    }
+    
+    private func fetchRepositories() async {
+        guard let repositories = try? await GithubAPIManager.getRepositories(for: user, with: token) else {
+            status = .failed
+            return
+        }
+        
+        status = .loaded(repositories)
     }
 }
 
 #Preview {
-    UserDetailView()
+    UserDetailView(user: SimpleUser(icon: URL("https://avatars.githubusercontent.com/u/1?v=4")!, username: "mojombo", id: 1), token: AuthenticationModel(token: "abcd")!)
 }

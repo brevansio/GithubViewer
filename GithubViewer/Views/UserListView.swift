@@ -26,7 +26,7 @@ struct UserListView: View {
             }
         case .loaded(let users):
             List(users) { user in
-                NavigationLink(destination: UserDetailView()) {
+                NavigationLink(destination: UserDetailView(user: user, token: authenticationToken)) {
                     SimpleUserCell(user: user)
                 }
             }
