@@ -7,7 +7,24 @@
 
 import Foundation
 
-struct AuthenticationModel {
+enum ValidationStatus: Equatable {
+    case invalid
+    case validating
+    case valid(AuthenticationModel)
+    
+    static func == (lhs: ValidationStatus, rhs: ValidationStatus) -> Bool {
+        switch (lhs, rhs) {
+        case (.invalid, .invalid), (.validating, .validating):
+            return true
+        case (.valid(let lhsToken), .valid(let rhsToken)):
+            return lhsToken.token == rhsToken.token
+        default:
+            return false
+        }
+    }
+}
+
+struct AuthenticationModel: Sendable {
     // Note: Using normal characters, so it won't fail
     static let tokenID = "io.brevans.gitviewer.token".data(using: .utf8)!
     
@@ -15,21 +32,10 @@ struct AuthenticationModel {
     
     init?(token: String? = nil) {
         if let token,
-           !token.isEmpty,
-           let tokenData = token.data(using: .utf8) {
-            
+           !token.isEmpty {
             // TODO: Add Validation Logic
             // For now the above `if` should cover "basic" validation
-            
             self.token = token
-            
-            let query = [
-                kSecClass: kSecClassKey,
-                kSecAttrApplicationTag: AuthenticationModel.tokenID,
-                kSecValueData: tokenData
-            ] as CFDictionary
-            
-            SecItemAdd(query, nil)  // FIXME: Validate the status. Low priority/risk here, but relates to UX
         } else {
             let query = [
                 kSecClass: kSecClassKey,
@@ -45,5 +51,24 @@ struct AuthenticationModel {
             
             self.token = token
         }
+    }
+    
+    func persist() {
+        let query = [
+            kSecClass: kSecClassKey,
+            kSecAttrApplicationTag: AuthenticationModel.tokenID,
+            kSecValueData: token.data(using: .utf8)!    // TODO: Clean up this IOU
+        ] as CFDictionary
+        
+        SecItemAdd(query, nil)  // FIXME: Validate the status. Low priority/risk here, but relates to UX
+    }
+    
+    static func clearExistingToken() {
+        let query = [
+            kSecClass: kSecClassKey,
+            kSecAttrApplicationTag: AuthenticationModel.tokenID
+        ] as CFDictionary
+        
+        SecItemDelete(query)
     }
 }

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct AuthenticationInputView: View {
     @State var token = ""
+    @State var validationStatus = ValidationStatus.invalid  // TODO: Show an error popup on _why_ it is invalid
     
     let onSubmit: (AuthenticationModel?) -> Void
     
@@ -20,26 +21,62 @@ struct AuthenticationInputView: View {
                     Image(systemName: "lock")
                         .foregroundStyle(.primary)
                     SecureField("Token", text: $token)
+                        .disabled(validationStatus != .invalid)
                         .onSubmit {
-                            onSubmit(AuthenticationModel(token: token))
+                            Task {
+                                await validate(token)
+                            }
                         }
                         .foregroundStyle(.primary)
                 }
                 .padding([.top, .leading, .trailing])
                 
-                Button {
-                    onSubmit(AuthenticationModel(token: token))
-                } label: {
-                    Text("Submit")
-                        .foregroundStyle(.primary)
+                switch validationStatus {
+                case .invalid:
+                    Button {
+                        Task {
+                            await validate(token)
+                        }
+                    } label: {
+                        Text("Validate")
+                            .foregroundStyle(.primary)
+                    }
+                    .padding(.all)
+                case .validating:
+                    ProgressView()
+                        .padding()
+                case .valid(let authenticationToken):
+                    Button {
+                        onSubmit(authenticationToken)
+                    } label: {
+                        Text("Submit")
+                    }
                 }
-                .padding(.all)
             }
             .padding()
             .background(.separator)
             .cornerRadius(15)
             
             Spacer()
+        }
+    }
+    
+    func validate(_ tokenString: String) async {
+        validationStatus = .validating
+        guard let authenticationToken = AuthenticationModel(token: tokenString) else {
+            validationStatus = .invalid
+            return
+        }
+        do {
+            if try await GithubAPIManager.basicAuthentication(with: authenticationToken) {
+                authenticationToken.persist()
+                validationStatus = .valid(authenticationToken)
+            } else {
+                validationStatus = .invalid
+            }
+        } catch {
+            // TODO: Show an Authenication Error
+            validationStatus = .invalid
         }
     }
 }
