@@ -12,7 +12,29 @@ enum NetworkError: Error {
 }
 
 enum GithubAPIManager {
-    static let apiEndPoint = URL(string: "https://api.github.com/v3/")! // Note: Known URl
+    private enum APIEndpoints {
+        case authentication
+        case userList
+        case user(String)
+        case repositoryList(String)
+        
+        private static let baseEndpoint = URL(string: "https://api.github.com/")! // Note: Known URl
+
+        var endpoint: URL {
+            let endpointExtention: String
+            switch self {
+            case .authentication:
+                endpointExtention = ""
+            case .userList:
+                endpointExtention = "users"
+            case .user(let username):
+                endpointExtention = "users/\(username)"
+            case .repositoryList(let username):
+                endpointExtention = "users/\(username)/repos"
+            }
+            return APIEndpoints.baseEndpoint.appendingPathComponent(endpointExtention)
+        }
+    }
     
     static func basicAuthentication(with authentication: AuthenticationModel) async throws -> Bool {
         let authenticationHeader = [
@@ -25,7 +47,7 @@ enum GithubAPIManager {
         
         let authenticatedSession = URLSession(configuration: configuration)
         
-        let response = try await authenticatedSession.data(from: apiEndPoint)
+        let response = try await authenticatedSession.data(from: APIEndpoints.authentication.endpoint)
         guard let httpResponse = response.1 as? HTTPURLResponse else {
             return false
         }
