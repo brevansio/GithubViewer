@@ -84,5 +84,59 @@ enum GithubAPIManager {
         default:
             return nil
         }
+        
+        // TODO: Handle Pagination
+    }
+    
+    static func getUserDetails(for user: SimpleUser, with authentication: AuthenticationModel) async throws -> User? {
+        let authenticationHeader = [
+            "Authentication": "BEARER \(authentication.token)",
+            "X-Github-Api-Version": "2022-11-28"
+        ]
+        
+        let configuration = URLSessionConfiguration.default
+        configuration.httpAdditionalHeaders = authenticationHeader
+        
+        let authenticatedSession = URLSession(configuration: configuration)
+        
+        let response = try await authenticatedSession.data(from: APIEndpoints.user(user.username).endpoint)
+        guard let httpResponse = response.1 as? HTTPURLResponse else {
+            return nil
+        }
+        
+        // TODO: Handle different codes as different issues. Especially 400 vs 500
+        switch httpResponse.statusCode {
+        case 200..<300:
+            return try JSONDecoder().decode(User.self, from: response.0)
+        default:
+            return nil
+        }
+    }
+    
+    static func getRepositories(for user: SimpleUser, with authentication: AuthenticationModel) async throws -> [Repository]? {
+        let authenticationHeader = [
+            "Authentication": "BEARER \(authentication.token)",
+            "X-Github-Api-Version": "2022-11-28"
+        ]
+        
+        let configuration = URLSessionConfiguration.default
+        configuration.httpAdditionalHeaders = authenticationHeader
+        
+        let authenticatedSession = URLSession(configuration: configuration)
+        
+        let response = try await authenticatedSession.data(from: APIEndpoints.repositoryList(user.username).endpoint)
+        guard let httpResponse = response.1 as? HTTPURLResponse else {
+            return nil
+        }
+        
+        // TODO: Handle different codes as different issues. Especially 400 vs 500
+        switch httpResponse.statusCode {
+        case 200..<300:
+            return try JSONDecoder().decode([Repository].self, from: response.0)
+        default:
+            return nil
+        }
+        
+        // TODO: Handle Pagination
     }
 }
