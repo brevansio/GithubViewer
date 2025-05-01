@@ -60,4 +60,29 @@ enum GithubAPIManager {
             return false
         }
     }
+    
+    static func getUserList(with authentication: AuthenticationModel) async throws -> [SimpleUser]? {
+        let authenticationHeader = [
+            "Authentication": "BEARER \(authentication.token)",
+            "X-Github-Api-Version": "2022-11-28"
+        ]
+        
+        let configuration = URLSessionConfiguration.default
+        configuration.httpAdditionalHeaders = authenticationHeader
+        
+        let authenticatedSession = URLSession(configuration: configuration)
+        
+        let response = try await authenticatedSession.data(from: APIEndpoints.userList.endpoint)
+        guard let httpResponse = response.1 as? HTTPURLResponse else {
+            return nil
+        }
+        
+        // TODO: Handle different codes as different issues. Especially 400 vs 500
+        switch httpResponse.statusCode {
+        case 200..<300:
+            return try JSONDecoder().decode([SimpleUser].self, from: response.0)
+        default:
+            return nil
+        }
+    }
 }
