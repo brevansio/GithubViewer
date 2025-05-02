@@ -34,5 +34,5 @@ struct RepositoryCell: View {
 }
 
 #Preview {
-    RepositoryCell(repository: Repository(id: 0, name: "Test/test", description: "A test Repo", url: URL("https://google.com")!, language: "Swift", stars: 3, isForked: false))
+    RepositoryCell(repository: Repository(id: 0, name: "Test/test", description: "A test Repo", url: URL(string: "https://github.com")!, language: "Swift", stars: 3, isForked: false))
 }

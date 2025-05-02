@@ -8,8 +8,9 @@
 import SwiftUI
 
 struct UserCardView: View {
+    @Environment(\.apiManager) var apiManager
+    
     let user: SimpleUser
-    let token: AuthenticationModel
     
     @State private var status = LoadingStatus<User>.loading
     
@@ -58,7 +59,7 @@ struct UserCardView: View {
     }
     
     private func getUserDetails() async {
-        guard let details = try? await GithubAPIManager.getUserDetails(for: user, with: token) else {
+        guard let details = try? await apiManager?.getUserDetails(for: user) else {
             status = .failed
             return
         }
@@ -102,6 +103,7 @@ struct FollowerView: View {
 }
 
 #Preview {
-    UserCardView(user: SimpleUser(icon: URL("https://avatars.githubusercontent.com/u/1?v=4")!, username: "mojombo", id: 1), token: try! AuthenticationModel(token: "abcd"))
+    UserCardView(user: SimpleUser(icon: nil, username: "Test", id: 1))
+        .environment(\.apiManager, MockedAPIManager())
 }
 

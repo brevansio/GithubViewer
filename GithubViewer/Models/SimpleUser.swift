@@ -8,7 +8,7 @@
 import Foundation
 
 struct SimpleUser: Codable, Identifiable {
-    let icon: URL
+    let icon: URL?
     let username: String
     let id: Int
     

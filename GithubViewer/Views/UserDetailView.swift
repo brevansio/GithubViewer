@@ -9,14 +9,15 @@ import SafariServices
 import SwiftUI
 
 struct UserDetailView: View {
+    @Environment(\.apiManager) var apiManager
+    
     let user: SimpleUser
-    let token: AuthenticationModel
     
     @State var status = LoadingStatus<[Repository]>.loading
     @State var selectedRepository: Repository?
     
     var body: some View {
-        UserCardView(user: user, token: token)
+        UserCardView(user: user)
         Spacer()
         List {
             switch status {
@@ -49,7 +50,7 @@ struct UserDetailView: View {
     }
     
     private func fetchRepositories() async {
-        guard let repositories = try? await GithubAPIManager.getRepositories(for: user, with: token) else {
+        guard let repositories = try? await apiManager?.getRepositories(for: user) else {
             status = .failed
             return
         }
@@ -59,5 +60,6 @@ struct UserDetailView: View {
 }
 
 #Preview {
-    UserDetailView(user: SimpleUser(icon: URL("https://avatars.githubusercontent.com/u/1?v=4")!, username: "mojombo", id: 1), token: try! AuthenticationModel(token: "abcd"))
+    UserDetailView(user: SimpleUser(icon: nil, username: "TestUser", id: 1))
+        .environment(\.apiManager, MockedAPIManager())
 }

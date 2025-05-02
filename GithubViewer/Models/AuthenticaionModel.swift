@@ -13,23 +13,6 @@ enum AuthenticationError: Error {
     case keychainFailure
 }
 
-enum ValidationStatus: Equatable {
-    case invalid
-    case validating
-    case valid(AuthenticationModel)
-    
-    static func == (lhs: ValidationStatus, rhs: ValidationStatus) -> Bool {
-        switch (lhs, rhs) {
-        case (.invalid, .invalid), (.validating, .validating):
-            return true
-        case (.valid(let lhsToken), .valid(let rhsToken)):
-            return lhsToken.token == rhsToken.token
-        default:
-            return false
-        }
-    }
-}
-
 struct AuthenticationModel: Sendable {
     // Note: Using normal characters, so it won't fail
     static let tokenID = "io.brevans.gitviewer.token".data(using: .utf8)!

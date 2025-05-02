@@ -7,21 +7,14 @@
 
 import Foundation
 
-enum NetworkError: Error {
-    case authentication(status: Int)
-    case server(status: Int)
-    case genericConnection(status: Int)
-    case invalidData
-}
-
-enum GithubAPIManager {
+struct GithubAPIManager: APIManager {
     private enum APIEndpoints {
         case authentication
         case userList
         case user(String)
         case repositoryList(String)
         
-        private static let baseEndpoint = URL(string: "https://api.github.com/")! // Note: Known URl
+        private static let baseEndpoint = URL(string: "https://api.github.com/")! // Note: Known URL
 
         var endpoint: URL {
             let endpointExtention: String
@@ -39,7 +32,10 @@ enum GithubAPIManager {
         }
     }
     
-    static func basicAuthentication(with authentication: AuthenticationModel) async throws {
+    let uuid = UUID()
+    private let authenticatedSession: URLSession
+    
+    init(with authentication: AuthenticationModel) {
         let authenticationHeader = [
             "Authentication": "BEARER \(authentication.token)",
             "X-Github-Api-Version": "2022-11-28"
@@ -48,16 +44,18 @@ enum GithubAPIManager {
         let configuration = URLSessionConfiguration.default
         configuration.httpAdditionalHeaders = authenticationHeader
         
-        let authenticatedSession = URLSession(configuration: configuration)
-        
-        let response = try await authenticatedSession.data(from: APIEndpoints.authentication.endpoint)
+        authenticatedSession = URLSession(configuration: configuration)
+    }
+    
+    private func performRequest(to endpoint: URL) async throws -> Data {
+        let response = try await authenticatedSession.data(from: endpoint)
         guard let httpResponse = response.1 as? HTTPURLResponse else {
             throw NetworkError.invalidData
         }
         
         switch httpResponse.statusCode {
         case 200..<300:
-            return
+            return response.0
         case 400..<500:
             throw NetworkError.authentication(status: httpResponse.statusCode)
         case 500..<600:
@@ -67,90 +65,26 @@ enum GithubAPIManager {
         }
     }
     
-    static func getUserList(with authentication: AuthenticationModel) async throws -> [SimpleUser]? {
-        let authenticationHeader = [
-            "Authentication": "BEARER \(authentication.token)",
-            "X-Github-Api-Version": "2022-11-28"
-        ]
-        
-        let configuration = URLSessionConfiguration.default
-        configuration.httpAdditionalHeaders = authenticationHeader
-        
-        let authenticatedSession = URLSession(configuration: configuration)
-        
-        let response = try await authenticatedSession.data(from: APIEndpoints.userList.endpoint)
-        guard let httpResponse = response.1 as? HTTPURLResponse else {
-            return nil
-        }
-        
-        switch httpResponse.statusCode {
-        case 200..<300:
-            return try JSONDecoder().decode([SimpleUser].self, from: response.0)
-        case 400..<500:
-            throw NetworkError.authentication(status: httpResponse.statusCode)
-        case 500..<600:
-            throw NetworkError.server(status: httpResponse.statusCode)
-        default:
-            throw NetworkError.genericConnection(status: httpResponse.statusCode)
-        }
+    func basicAuthentication() async throws {
+        let _ = try await performRequest(to: APIEndpoints.authentication.endpoint)
+        return
+    }
+    
+    func getUserList() async throws -> [SimpleUser] {
+        let responseData = try await performRequest(to: APIEndpoints.userList.endpoint)
+        return try JSONDecoder().decode([SimpleUser].self, from: responseData)
         
         // TODO: Handle Pagination
     }
     
-    static func getUserDetails(for user: SimpleUser, with authentication: AuthenticationModel) async throws -> User? {
-        let authenticationHeader = [
-            "Authentication": "BEARER \(authentication.token)",
-            "X-Github-Api-Version": "2022-11-28"
-        ]
-        
-        let configuration = URLSessionConfiguration.default
-        configuration.httpAdditionalHeaders = authenticationHeader
-        
-        let authenticatedSession = URLSession(configuration: configuration)
-        
-        let response = try await authenticatedSession.data(from: APIEndpoints.user(user.username).endpoint)
-        guard let httpResponse = response.1 as? HTTPURLResponse else {
-            return nil
-        }
-        
-        switch httpResponse.statusCode {
-        case 200..<300:
-            return try JSONDecoder().decode(User.self, from: response.0)
-        case 400..<500:
-            throw NetworkError.authentication(status: httpResponse.statusCode)
-        case 500..<600:
-            throw NetworkError.server(status: httpResponse.statusCode)
-        default:
-            throw NetworkError.genericConnection(status: httpResponse.statusCode)
-        }
+    func getUserDetails(for user: SimpleUser) async throws -> User {
+        let responseData = try await performRequest(to: APIEndpoints.user(user.username).endpoint)
+        return try JSONDecoder().decode(User.self, from: responseData)
     }
     
-    static func getRepositories(for user: SimpleUser, with authentication: AuthenticationModel) async throws -> [Repository]? {
-        let authenticationHeader = [
-            "Authentication": "BEARER \(authentication.token)",
-            "X-Github-Api-Version": "2022-11-28"
-        ]
-        
-        let configuration = URLSessionConfiguration.default
-        configuration.httpAdditionalHeaders = authenticationHeader
-        
-        let authenticatedSession = URLSession(configuration: configuration)
-        
-        let response = try await authenticatedSession.data(from: APIEndpoints.repositoryList(user.username).endpoint)
-        guard let httpResponse = response.1 as? HTTPURLResponse else {
-            return nil
-        }
-        
-        switch httpResponse.statusCode {
-        case 200..<300:
-            return try JSONDecoder().decode([Repository].self, from: response.0)
-        case 400..<500:
-            throw NetworkError.authentication(status: httpResponse.statusCode)
-        case 500..<600:
-            throw NetworkError.server(status: httpResponse.statusCode)
-        default:
-            throw NetworkError.genericConnection(status: httpResponse.statusCode)
-        }
+    func getRepositories(for user: SimpleUser) async throws -> [Repository] {
+        let responseData = try await performRequest(to: APIEndpoints.repositoryList(user.username).endpoint)
+        return try JSONDecoder().decode([Repository].self, from: responseData)
         
         // TODO: Handle Pagination
     }

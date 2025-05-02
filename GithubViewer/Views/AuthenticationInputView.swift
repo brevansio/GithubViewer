@@ -11,7 +11,7 @@ struct AuthenticationInputView: View {
     @State var token = ""
     @State var validationStatus = ValidationStatus.invalid  // TODO: Show an error popup on _why_ it is invalid
     
-    let onSubmit: (AuthenticationModel?) -> Void
+    let onValidation: (APIManager?) -> Void
     
     var body: some View {
         HStack {
@@ -45,12 +45,12 @@ struct AuthenticationInputView: View {
                 case .validating:
                     ProgressView()
                         .padding()
-                case .valid(let authenticationToken):
-                    Button {
-                        onSubmit(authenticationToken)
-                    } label: {
-                        Text("Submit")
-                    }
+                case .valid(let apiManager):
+                    ProgressView()
+                        .padding()
+                        .onAppear {
+                            onValidation(apiManager)
+                        }
                 }
             }
             .padding()
@@ -65,12 +65,10 @@ struct AuthenticationInputView: View {
         validationStatus = .validating
         do {
             let authenticationToken = try AuthenticationModel(token: tokenString)
-            if try await GithubAPIManager.basicAuthentication(with: authenticationToken) {
-                try authenticationToken.persist()
-                validationStatus = .valid(authenticationToken)
-            } else {
-                validationStatus = .invalid // TODO: Show an error message
-            }
+            let apiManager = GithubAPIManager(with: authenticationToken)
+            try await apiManager.basicAuthentication()
+            try authenticationToken.persist()
+            validationStatus = .valid(apiManager)
         } catch {
             // TODO: Show a specific error message
             validationStatus = .invalid

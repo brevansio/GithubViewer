@@ -7,22 +7,28 @@
 
 import SwiftUI
 
+
+
 struct ContentView: View {
     // Note: It's probably ok to ignore the error here. It would mean that we can't read from the keychain, so
     // we need to re-enter anyway. That already happens in this view.
-    @State var authenticationModel: AuthenticationModel? = try? AuthenticationModel()
+    @State var apiManager: APIManager? = {
+        guard let authenticationModel = try? AuthenticationModel() else { return nil }
+        return GithubAPIManager(with: authenticationModel)
+    }()
     
     var body: some View {
-        switch authenticationModel {
+        switch apiManager {
         case .none:
-            AuthenticationInputView { newModel in
-                authenticationModel = newModel
+            AuthenticationInputView { apiManager in
+                self.apiManager = apiManager
             }
-        case .some(let token):
+        case .some(let manager):
             NavigationView {
-                UserListView(authenticationToken: token)
+                UserListView()
                     .navigationTitle("User List")
             }
+            .environment(\.apiManager, manager)
         }
     }
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct UserListView: View {
-    let authenticationToken: AuthenticationModel
+    @Environment(\.apiManager) var apiManager
 
     @State private var status = LoadingStatus<[SimpleUser]>.loading
     
@@ -17,7 +17,7 @@ struct UserListView: View {
         case .loading:
             List {
                 ForEach(0..<20) { fakeId in
-                    SimpleUserCell(user: .init(icon: URL("https://google.com")!, username: "username", id: fakeId))
+                    SimpleUserCell(user: .init(icon: nil, username: "username", id: fakeId))
                         .redacted(reason: .placeholder)
                 }
             }
@@ -26,7 +26,9 @@ struct UserListView: View {
             }
         case .loaded(let users):
             List(users) { user in
-                NavigationLink(destination: UserDetailView(user: user, token: authenticationToken)) {
+                NavigationLink {
+                    UserDetailView(user: user)
+                } label: {
                     SimpleUserCell(user: user)
                 }
             }
@@ -37,7 +39,7 @@ struct UserListView: View {
     }
     
     private func populateUsers() async {
-        guard let users = try? await GithubAPIManager.getUserList(with: authenticationToken) else {
+        guard let users = try? await apiManager?.getUserList() else {   // TODO: Losing the error is bad?
             status = .failed
             return
         }
@@ -47,5 +49,6 @@ struct UserListView: View {
 }
 
 #Preview {
-    UserListView(authenticationToken: try! .init(token: "abdc"))
+    UserListView()
+        .environment(\.apiManager, MockedAPIManager())
 }
