@@ -6,6 +6,12 @@
 //
 
 import Foundation
+import RegexBuilder
+
+enum AuthenticationError: Error {
+    case invalidFormat
+    case keychainFailure
+}
 
 enum ValidationStatus: Equatable {
     case invalid
@@ -30,11 +36,16 @@ struct AuthenticationModel: Sendable {
     
     let token: String
     
-    init?(token: String? = nil) {
+    init(token: String? = nil) throws {
+        let regex = try Regex("^github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59}$")
+        let legacyRegex = try Regex("^ghp_[a-zA-Z0-9]{36,40}$")
+        
         if let token,
            !token.isEmpty {
-            // TODO: Add Validation Logic
-            // For now the above `if` should cover "basic" validation
+            // TODO: Split the Regexes Apart. We can show a helpful message about upgrading the "Classic" tokens
+            guard let _ = try regex.wholeMatch(in: token) ?? legacyRegex.wholeMatch(in: token) else {
+                throw AuthenticationError.invalidFormat
+            }
             self.token = token
         } else {
             let query = [
@@ -44,31 +55,42 @@ struct AuthenticationModel: Sendable {
             ] as CFDictionary
             
             var tokenDataReference: CFTypeRef?
-            SecItemCopyMatching(query, &tokenDataReference) // FIXME: Validate the status. Low priority/risk here, but relates to UX
+            guard SecItemCopyMatching(query, &tokenDataReference) == errSecSuccess else {
+                throw AuthenticationError.keychainFailure
+            }
             
             guard let tokenData = tokenDataReference as? Data,
-                  let token = String(data: tokenData, encoding: .utf8) else { return nil }
+                  let token = String(data: tokenData, encoding: .utf8) else { throw AuthenticationError.invalidFormat }
+            
+            guard let _ = try regex.wholeMatch(in: token) ?? legacyRegex.wholeMatch(in: token) else {
+                throw AuthenticationError.invalidFormat
+            }
             
             self.token = token
         }
     }
     
-    func persist() {
+    func persist() throws {
+        guard let tokenData = token.data(using: .utf8) else { throw AuthenticationError.invalidFormat }
         let query = [
             kSecClass: kSecClassKey,
             kSecAttrApplicationTag: AuthenticationModel.tokenID,
-            kSecValueData: token.data(using: .utf8)!    // TODO: Clean up this IOU
+            kSecValueData: tokenData
         ] as CFDictionary
         
-        SecItemAdd(query, nil)  // FIXME: Validate the status. Low priority/risk here, but relates to UX
+        if SecItemAdd(query, nil) != errSecSuccess {
+            throw AuthenticationError.keychainFailure
+        }
     }
     
-    static func clearExistingToken() {
+    static func clearExistingToken() throws {
         let query = [
             kSecClass: kSecClassKey,
             kSecAttrApplicationTag: AuthenticationModel.tokenID
         ] as CFDictionary
         
-        SecItemDelete(query)
+        if SecItemDelete(query) != errSecSuccess {
+            throw AuthenticationError.keychainFailure
+        }
     }
 }

@@ -47,5 +47,5 @@ struct UserListView: View {
 }
 
 #Preview {
-    UserListView(authenticationToken: .init(token: "abdc")!)
+    UserListView(authenticationToken: try! .init(token: "abdc"))
 }

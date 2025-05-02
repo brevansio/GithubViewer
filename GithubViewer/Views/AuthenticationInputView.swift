@@ -63,19 +63,16 @@ struct AuthenticationInputView: View {
     
     func validate(_ tokenString: String) async {
         validationStatus = .validating
-        guard let authenticationToken = AuthenticationModel(token: tokenString) else {
-            validationStatus = .invalid
-            return
-        }
         do {
+            let authenticationToken = try AuthenticationModel(token: tokenString)
             if try await GithubAPIManager.basicAuthentication(with: authenticationToken) {
-                authenticationToken.persist()
+                try authenticationToken.persist()
                 validationStatus = .valid(authenticationToken)
             } else {
-                validationStatus = .invalid
+                validationStatus = .invalid // TODO: Show an error message
             }
         } catch {
-            // TODO: Show an Authenication Error
+            // TODO: Show a specific error message
             validationStatus = .invalid
         }
     }

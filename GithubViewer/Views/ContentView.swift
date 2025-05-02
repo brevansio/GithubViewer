@@ -8,7 +8,9 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State var authenticationModel = AuthenticationModel()
+    // Note: It's probably ok to ignore the error here. It would mean that we can't read from the keychain, so
+    // we need to re-enter anyway. That already happens in this view.
+    @State var authenticationModel: AuthenticationModel? = try? AuthenticationModel()
     
     var body: some View {
         switch authenticationModel {

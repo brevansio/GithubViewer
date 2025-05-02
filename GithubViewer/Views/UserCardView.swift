@@ -102,6 +102,6 @@ struct FollowerView: View {
 }
 
 #Preview {
-    UserCardView(user: SimpleUser(icon: URL("https://avatars.githubusercontent.com/u/1?v=4")!, username: "mojombo", id: 1), token: AuthenticationModel(token: "abcd")!)
+    UserCardView(user: SimpleUser(icon: URL("https://avatars.githubusercontent.com/u/1?v=4")!, username: "mojombo", id: 1), token: try! AuthenticationModel(token: "abcd"))
 }
 

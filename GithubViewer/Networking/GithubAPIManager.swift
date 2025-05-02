@@ -9,6 +9,9 @@ import Foundation
 
 enum NetworkError: Error {
     case authentication(status: Int)
+    case server(status: Int)
+    case genericConnection(status: Int)
+    case invalidData
 }
 
 enum GithubAPIManager {
@@ -36,7 +39,7 @@ enum GithubAPIManager {
         }
     }
     
-    static func basicAuthentication(with authentication: AuthenticationModel) async throws -> Bool {
+    static func basicAuthentication(with authentication: AuthenticationModel) async throws {
         let authenticationHeader = [
             "Authentication": "BEARER \(authentication.token)",
             "X-Github-Api-Version": "2022-11-28"
@@ -49,15 +52,18 @@ enum GithubAPIManager {
         
         let response = try await authenticatedSession.data(from: APIEndpoints.authentication.endpoint)
         guard let httpResponse = response.1 as? HTTPURLResponse else {
-            return false
+            throw NetworkError.invalidData
         }
         
-        // TODO: Handle different codes as different issues. Especially 400 vs 500
         switch httpResponse.statusCode {
         case 200..<300:
-            return true
+            return
+        case 400..<500:
+            throw NetworkError.authentication(status: httpResponse.statusCode)
+        case 500..<600:
+            throw NetworkError.server(status: httpResponse.statusCode)
         default:
-            return false
+            throw NetworkError.genericConnection(status: httpResponse.statusCode)
         }
     }
     
@@ -77,12 +83,15 @@ enum GithubAPIManager {
             return nil
         }
         
-        // TODO: Handle different codes as different issues. Especially 400 vs 500
         switch httpResponse.statusCode {
         case 200..<300:
             return try JSONDecoder().decode([SimpleUser].self, from: response.0)
+        case 400..<500:
+            throw NetworkError.authentication(status: httpResponse.statusCode)
+        case 500..<600:
+            throw NetworkError.server(status: httpResponse.statusCode)
         default:
-            return nil
+            throw NetworkError.genericConnection(status: httpResponse.statusCode)
         }
         
         // TODO: Handle Pagination
@@ -104,12 +113,15 @@ enum GithubAPIManager {
             return nil
         }
         
-        // TODO: Handle different codes as different issues. Especially 400 vs 500
         switch httpResponse.statusCode {
         case 200..<300:
             return try JSONDecoder().decode(User.self, from: response.0)
+        case 400..<500:
+            throw NetworkError.authentication(status: httpResponse.statusCode)
+        case 500..<600:
+            throw NetworkError.server(status: httpResponse.statusCode)
         default:
-            return nil
+            throw NetworkError.genericConnection(status: httpResponse.statusCode)
         }
     }
     
@@ -129,12 +141,15 @@ enum GithubAPIManager {
             return nil
         }
         
-        // TODO: Handle different codes as different issues. Especially 400 vs 500
         switch httpResponse.statusCode {
         case 200..<300:
             return try JSONDecoder().decode([Repository].self, from: response.0)
+        case 400..<500:
+            throw NetworkError.authentication(status: httpResponse.statusCode)
+        case 500..<600:
+            throw NetworkError.server(status: httpResponse.statusCode)
         default:
-            return nil
+            throw NetworkError.genericConnection(status: httpResponse.statusCode)
         }
         
         // TODO: Handle Pagination

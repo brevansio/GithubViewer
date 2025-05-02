@@ -59,5 +59,5 @@ struct UserDetailView: View {
 }
 
 #Preview {
-    UserDetailView(user: SimpleUser(icon: URL("https://avatars.githubusercontent.com/u/1?v=4")!, username: "mojombo", id: 1), token: AuthenticationModel(token: "abcd")!)
+    UserDetailView(user: SimpleUser(icon: URL("https://avatars.githubusercontent.com/u/1?v=4")!, username: "mojombo", id: 1), token: try! AuthenticationModel(token: "abcd"))
 }
