@@ -13,7 +13,6 @@ struct UserDetailView: View {
     let token: AuthenticationModel
     
     @State var status = LoadingStatus<[Repository]>.loading
-    @State var selectedRepository: Repository?
     
     var body: some View {
         UserCardView(user: user, token: token)
@@ -25,8 +24,9 @@ struct UserDetailView: View {
                 // TODO: PlaceHolder
             case .loaded(let respositoryList):
                 ForEach(respositoryList) { repository in
-                    Button {
-                        selectedRepository = repository
+                    NavigationLink {
+                        SafariView(url: repository.url)
+                            .navigationTitle(repository.name)
                     } label: {
                         RepositoryCell(repository: repository)
                     }
@@ -40,11 +40,6 @@ struct UserDetailView: View {
             Task {
                 await fetchRepositories()
             }
-        }
-        .fullScreenCover(item: $selectedRepository) { repository in
-            SafariView(url: repository.url)
-                .ignoresSafeArea()
-                .transition(.move(edge: .trailing))
         }
     }
     
