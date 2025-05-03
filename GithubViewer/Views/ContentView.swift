@@ -18,17 +18,16 @@ struct ContentView: View {
     }()
     
     var body: some View {
-        switch apiManager {
-        case .none:
-            AuthenticationInputView { apiManager in
-                self.apiManager = apiManager
-            }
-        case .some(let manager):
+        if let apiManager {
             NavigationView {
                 UserListView()
                     .navigationTitle("User List")
             }
-            .environment(\.apiManager, manager)
+            .environment(\.apiManager, apiManager)
+        } else {
+            AuthenticationInputView { apiManager in
+                self.apiManager = apiManager
+            }
         }
     }
 }

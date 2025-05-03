@@ -28,21 +28,8 @@ struct UserDetailView: View {
         VStack {
             UserCardView(user: user)
             Spacer()
-            switch repositories {
-            case .none:
-                List {
-                    ForEach(0..<5) { fakeId in
-                        RepositoryCell(repository: Repository(id: fakeId, name: "Test/test", description: "A test Repo", url: URL(string: "https://github.com")!, language: "Swift", stars: 3, isForked: false))
-                            .redacted(reason: .placeholder)
-                    }
-                }
-                .onAppear {
-                    Task {
-                        await fetchRepositories()
-                    }
-                }
-            case .some(let respositoryList):
-                List(respositoryList) { repository in
+            if let repositories {
+                List(repositories) { repository in
                     Button {
                         selectedRepository = repository
                     } label: {
@@ -55,6 +42,18 @@ struct UserDetailView: View {
                             Task { await fetchRepositories(from: nextPageURL) }
                             nextPage = nil
                         }
+                    }
+                }
+            } else {
+                List {
+                    ForEach(0..<5) { fakeId in
+                        RepositoryCell(repository: Repository(id: fakeId, name: "Test/test", description: "A test Repo", url: URL(string: "https://github.com")!, language: "Swift", stars: 3, isForked: false))
+                            .redacted(reason: .placeholder)
+                    }
+                }
+                .onAppear {
+                    Task {
+                        await fetchRepositories()
                     }
                 }
             }

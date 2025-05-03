@@ -28,30 +28,28 @@ struct UserCardView: View {
             VStack(alignment: .leading) {
                 Text(user.username)
                     .font(.title)
-                switch detailedUser {
-                case .none:
-                    Text("Full Name")
-                        .font(.headline)
-                        .redacted(reason: .placeholder)
-                case .some(let detailedUser):
+                if let detailedUser {
                     Text(detailedUser.fullname ?? "")
                         .font(.headline)
                         .lineLimit(2)
+                } else {
+                    Text("Full Name")
+                        .font(.headline)
+                        .redacted(reason: .placeholder)
                 }
             }
             Spacer()
             HStack {
-                switch detailedUser {
-                case .none:
+                if let detailedUser {
+                    FollowerView(followType: .following(detailedUser.followingCount))
+                    Text("/")
+                    FollowerView(followType: .followers(detailedUser.followerCount))
+                } else {
                     FollowerView(followType: .following(99))
                         .redacted(reason: .placeholder)
                     Text("/")
                     FollowerView(followType: .followers(99))
                         .redacted(reason: .placeholder)
-                case .some(let detailedUser):
-                    FollowerView(followType: .following(detailedUser.followingCount))
-                    Text("/")
-                    FollowerView(followType: .followers(detailedUser.followerCount))
                 }
             }
             .layoutPriority(1)

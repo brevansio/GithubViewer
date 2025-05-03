@@ -22,19 +22,8 @@ struct UserListView: View {
     
     var body: some View {
         ZStack {
-            switch userList {
-            case .none:
-                List {
-                    ForEach(0..<20) { fakeId in
-                        SimpleUserCell(user: .init(icon: nil, username: "username", id: fakeId))
-                            .redacted(reason: .placeholder)
-                    }
-                }
-                .onAppear {
-                    Task { await populateUsers() }
-                }
-            case .some(let users):
-                List(users) { user in
+            if let userList {
+                List(userList) { user in
                     NavigationLink {
                         UserDetailView(user: user)
                     } label: {
@@ -49,8 +38,18 @@ struct UserListView: View {
                     }
                 }
                 .refreshable {
-                    userList = nil
+                    self.userList = nil
                     nextPage = nil
+                    Task { await populateUsers() }
+                }
+            } else {
+                List {
+                    ForEach(0..<20) { fakeId in
+                        SimpleUserCell(user: .init(icon: nil, username: "username", id: fakeId))
+                            .redacted(reason: .placeholder)
+                    }
+                }
+                .onAppear {
                     Task { await populateUsers() }
                 }
             }
