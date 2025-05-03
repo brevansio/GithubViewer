@@ -10,8 +10,8 @@ import Testing
 
 @testable import GithubViewer
 
-// Note: These are for development. They will not run correctly as Unit Tests.
-// To run, replace the `"abcd"` token with a real token, and run.
+/// Note: These are for development and they will not run correctly as Unit Tests.
+/// To run, replace the `"abcd"` token with a real token, and run. They will make **real** network calls
 struct GithubAPIManagerTests {
     let apiManager = {
         let authentication = try! AuthenticationModel(token: "abcd")

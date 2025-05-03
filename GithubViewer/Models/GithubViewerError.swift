@@ -7,8 +7,12 @@
 
 import Foundation
 
+/// An ``Error`` abstraction that provides additional information on "known" errors to the UI
 protocol GithubViewerError: Error {
+    /// A user-facing message
     var message: String { get }
+    
+    /// If `true` ignoring this error should not cause a significant impact on the App
     var isIgnorable: Bool { get }
 }
 
