@@ -110,10 +110,10 @@ struct GithubAPIManager: APIManager {
         if let pageURL {
             endpoint = .nextPage(pageURL)
         } else {
-            endpoint = .userList
+            endpoint = .repositoryList(user.username)
         }
 
-        let responseData = try await performRequest(to: APIEndpoints.repositoryList(user.username).url)
+        let responseData = try await performRequest(to: endpoint.url)
         let repositoryList = try JSONDecoder().decode([Repository].self, from: responseData.data)
         return (repositoryList, responseData.nextPage)
     }
