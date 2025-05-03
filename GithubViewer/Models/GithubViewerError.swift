@@ -26,6 +26,5 @@ enum UnknownError: GithubViewerError {
         }
     }
 
-    var isRecoverable: Bool { false }
     var isIgnorable: Bool { false }
 }
