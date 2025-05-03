@@ -8,13 +8,18 @@
 import SwiftUI
 
 struct SimpleUserCell: View {
+    private enum Design {
+        /// The "recommended" size of a tappable item in the HIG
+        static let avatarSize: CGFloat = 44
+    }
+
     @State var user: SimpleUser?
 
     var body: some View {
         HStack {
             AvatarView(url: user?.icon)
-                .frame(width: 44, height: 44)
-                .cornerRadius(22)
+                .frame(width: Design.avatarSize, height: Design.avatarSize)
+                .cornerRadius(Design.avatarSize / 2)
             Text(user?.username ?? "Unknown")
                 .font(.headline)
             Spacer()

@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct AuthenticationInputView: View {
+    private enum Design {
+        static let cornerRadius: CGFloat = 15
+    }
     @State private var token = ""
     @State private var validationStatus = ValidationStatus.invalid
     @State private var shouldShowError = false
@@ -62,7 +65,7 @@ struct AuthenticationInputView: View {
             }
             .padding()
             .background(.separator)
-            .cornerRadius(15)
+            .cornerRadius(Design.cornerRadius)
 
             Spacer()
         }

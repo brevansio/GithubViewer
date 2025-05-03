@@ -11,7 +11,7 @@ import Foundation
 protocol GithubViewerError: Error {
     /// A user-facing message
     var message: String { get }
-    
+
     /// If `true` ignoring this error should not cause a significant impact on the App
     var isIgnorable: Bool { get }
 }
