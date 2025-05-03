@@ -9,6 +9,8 @@
     import Foundation
 
     // TODO: Move this to somewhere more explicitly for testing. But keep in mind that Previews are the primary users.
+
+    /// A mock of the ``APIManager`` protocol for allowing development in SwiftUI using ``#Preview``
     struct MockedAPIManager: APIManager {
         let uuid = UUID()
 

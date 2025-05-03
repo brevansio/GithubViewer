@@ -84,6 +84,7 @@ struct UserDetailView: View {
         }
     }
 
+    /// Interface for calling the ``APIManager``
     private func fetchRepositories(from pageURL: URL? = nil) async {
         do {
             guard let results = try await apiManager?.getRepositories(for: user, from: pageURL) else {
@@ -98,6 +99,9 @@ struct UserDetailView: View {
         }
     }
 
+    /// Determines if we should fetch additional repositories
+    ///
+    /// Based on whether there are additional repositories to fetch and distance from the end of the array
     private func shouldLoadAdditionalRepositories(currentRepository: Repository) -> Bool {
         guard nextPage != nil else { return false }
         guard let repositories else { return false }

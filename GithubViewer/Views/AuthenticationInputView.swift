@@ -91,6 +91,9 @@ struct AuthenticationInputView: View {
 
     }
 
+    /// Interface for calling the ``APIManager``
+    ///
+    /// Gives the user the option to ignore formatting and persistance errors.
     func validate(_ tokenString: String, skipFormatErrors: Bool = false, skipPersistanceErrors: Bool = false) async {
         validationStatus = .validating
         do {

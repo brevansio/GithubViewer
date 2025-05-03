@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// An ``Error`` abstraction for errors related to creating an ``APIManager``
 enum NetworkError: GithubViewerError {
     case authentication(status: Int)
     case server(status: Int)
@@ -29,6 +30,9 @@ enum NetworkError: GithubViewerError {
     var isIgnorable: Bool { false }
 }
 
+/// Describes the current usable state of an ``APIManager``
+///
+/// Used in UI
 enum ValidationStatus: Equatable {  // TODO: Better naming?
     case invalid
     case validating
@@ -46,20 +50,33 @@ enum ValidationStatus: Equatable {  // TODO: Better naming?
     }
 }
 
-// Note: This only exists so we can mock and test the views without real-world API calls
+/// An interface for describing Github REST API calls
+///
+/// This only exists so we can mock and test the views without real-world API calls. Especially for Previews.
 protocol APIManager {
+    /// Used to test equality between two managers
     var uuid: UUID { get }
+    
+    /// Provides a simple test of whether or not the API is working correctly
     func basicAuthentication() async throws
+    
+    /// Returns a list of ``SimpleUser`` along with the ``URL`` for the next page of user results
     func getUserList(from pageURL: URL?) async throws -> (users: [SimpleUser], nextPage: URL?)
+    
+    /// As there is only a single ``User`` at a time, this does not require pagination
     func getUserDetails(for user: SimpleUser) async throws -> User
+    
+    /// Returns a list of ``Repository`` along with the ``URL`` for the next page of repository results
     func getRepositories(for user: SimpleUser, from pageURL: URL?) async throws -> (
         respositories: [Repository], nextPage: URL?
     )
 }
 
-// Note: Due to how `Equatable` works on Protocols, the above `ValidationStatus` won't compile since we are using
-// `any APIManager` instead of `some APIManager`.
 extension APIManager {
+    /// Compares two ``APIManager``s for equality
+    ///
+    ///  Due to how ``Equatable`` works on Protocols, the above ``ValidationStatus`` won't compile, even with
+    ///  ``Equatable`` conformance since we are using `any APIManager` instead of `some APIManager`.
     func isEqual(to otherManager: APIManager) -> Bool {
         self.uuid == otherManager.uuid
     }
