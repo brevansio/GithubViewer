@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SimpleUserCell: View {
     @State var user: SimpleUser?
-    
+
     var body: some View {
         HStack {
             AvatarView(url: user?.icon)
@@ -26,4 +26,3 @@ struct SimpleUserCell: View {
 #Preview {
     SimpleUserCell(user: SimpleUser(icon: nil, username: "TestUser", id: 1))
 }
-

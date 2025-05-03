@@ -17,9 +17,9 @@ struct AuthenticationInputView: View {
             validationStatus = .invalid
         }
     }
-    
+
     let onValidation: (APIManager?) -> Void
-    
+
     var body: some View {
         HStack {
             Spacer()
@@ -37,7 +37,7 @@ struct AuthenticationInputView: View {
                         .foregroundStyle(.primary)
                 }
                 .padding([.top, .leading, .trailing])
-                
+
                 switch validationStatus {
                 case .invalid:
                     Button {
@@ -63,7 +63,7 @@ struct AuthenticationInputView: View {
             .padding()
             .background(.separator)
             .cornerRadius(15)
-            
+
             Spacer()
         }
         .alert(LocalizedStringKey("Authentication Failure"), isPresented: $shouldShowError) {
@@ -77,7 +77,11 @@ struct AuthenticationInputView: View {
                     currentError = nil
                     validationStatus = .validating
                     Task {
-                        await validate(token, skipFormatErrors: isFormatError, skipPersistanceErrors: isPersistanceError)
+                        await validate(
+                            token,
+                            skipFormatErrors: isFormatError,
+                            skipPersistanceErrors: isPersistanceError
+                        )
                     }
                 }
             }
@@ -86,7 +90,7 @@ struct AuthenticationInputView: View {
         }
 
     }
-    
+
     func validate(_ tokenString: String, skipFormatErrors: Bool = false, skipPersistanceErrors: Bool = false) async {
         validationStatus = .validating
         do {

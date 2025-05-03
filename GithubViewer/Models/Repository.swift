@@ -15,7 +15,7 @@ struct Repository: Codable, Identifiable {
     let language: String?
     let stars: Int
     let isForked: Bool
-    
+
     enum CodingKeys: String, CodingKey {
         case id
         case name = "full_name"

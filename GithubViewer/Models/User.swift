@@ -13,7 +13,7 @@ struct User: Codable {
     let fullname: String?
     let followerCount: UInt
     let followingCount: UInt
-    
+
     enum CodingKeys: String, CodingKey {
         case icon = "avatar_url"
         case username = "login"

@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-
-
 struct ContentView: View {
     // Note: It's probably ok to ignore the error here. It would mean that we can't read from the keychain, so
     // we need to re-enter anyway. That already happens in this view.
@@ -16,7 +14,7 @@ struct ContentView: View {
         guard let authenticationModel = try? AuthenticationModel() else { return nil }
         return GithubAPIManager(with: authenticationModel)
     }()
-    
+
     var body: some View {
         if let apiManager {
             NavigationView {

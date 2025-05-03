@@ -11,7 +11,7 @@ struct SimpleUser: Codable, Identifiable {
     let icon: URL?
     let username: String
     let id: Int
-    
+
     enum CodingKeys: String, CodingKey {
         case icon = "avatar_url"
         case username = "login"

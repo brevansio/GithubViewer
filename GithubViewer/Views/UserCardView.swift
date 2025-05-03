@@ -9,9 +9,9 @@ import SwiftUI
 
 struct UserCardView: View {
     @Environment(\.apiManager) var apiManager
-    
+
     let user: SimpleUser
-    
+
     @State private var detailedUser: User?
     @State private var shouldShowError = false
     @State private var currentError: GithubViewerError? {
@@ -19,7 +19,7 @@ struct UserCardView: View {
             shouldShowError = currentError != nil
         }
     }
-    
+
     var body: some View {
         HStack {
             AvatarView(url: user.icon)
@@ -74,7 +74,7 @@ struct UserCardView: View {
             Text(currentError?.message ?? "Unknown Error")
         }
     }
-    
+
     private func getUserDetails() async {
         do {
             guard let details = try await apiManager?.getUserDetails(for: user) else {
@@ -96,7 +96,7 @@ struct FollowerView: View {
     enum FollowType {
         case followers(UInt)
         case following(UInt)
-        
+
         var title: String {
             switch self {
             case .followers:
@@ -105,7 +105,7 @@ struct FollowerView: View {
                 "Following"
             }
         }
-        
+
         var count: UInt {
             switch self {
             case .followers(let followerCount):
@@ -115,9 +115,9 @@ struct FollowerView: View {
             }
         }
     }
-    
+
     let followType: FollowType
-    
+
     var body: some View {
         VStack {
             Text(followType.title)
@@ -129,8 +129,7 @@ struct FollowerView: View {
 
 #Preview {
     UserCardView(user: SimpleUser(icon: nil, username: "Test", id: 1))
-#if DEBUG && targetEnvironment(simulator)
-        .environment(\.apiManager, MockedAPIManager())
-#endif
+        #if DEBUG && targetEnvironment(simulator)
+            .environment(\.apiManager, MockedAPIManager())
+        #endif
 }
-

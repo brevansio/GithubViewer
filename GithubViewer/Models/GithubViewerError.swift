@@ -15,14 +15,14 @@ protocol GithubViewerError: Error {
 
 enum UnknownError: GithubViewerError {
     case unknown(Error)
-    
+
     var message: String {
         switch self {
         case .unknown(let error):
             return "Unknown error: \(error)"
         }
     }
-    
+
     var isRecoverable: Bool { false }
     var isIgnorable: Bool { false }
 }

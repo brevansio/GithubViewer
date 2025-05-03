@@ -12,14 +12,14 @@ struct UserListView: View {
 
     @State private var userList: [SimpleUser]?
     @State private var nextPage: URL?
-    
+
     @State private var shouldShowError = false
     @State private var currentError: GithubViewerError? {
         didSet {
             shouldShowError = currentError != nil
         }
     }
-    
+
     var body: some View {
         ZStack {
             if let userList {
@@ -68,7 +68,7 @@ struct UserListView: View {
             Text(currentError?.message ?? "Unknown Error")
         }
     }
-    
+
     private func populateUsers(from pageURL: URL? = nil) async {
         do {
             guard let results = try await apiManager?.getUserList(from: pageURL) else {
@@ -85,7 +85,7 @@ struct UserListView: View {
             }
         }
     }
-    
+
     private func shouldLoadAdditionalUsers(currentUser: SimpleUser) -> Bool {
         guard nextPage != nil else { return false }
         guard let userList else { return false }
@@ -96,7 +96,7 @@ struct UserListView: View {
 
 #Preview {
     UserListView()
-#if DEBUG && targetEnvironment(simulator)
-        .environment(\.apiManager, MockedAPIManager())
-#endif
+        #if DEBUG && targetEnvironment(simulator)
+            .environment(\.apiManager, MockedAPIManager())
+        #endif
 }
