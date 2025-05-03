@@ -11,7 +11,7 @@ struct AvatarView: View {
     private enum Design {
         static let defaultImage = Image(systemName: "person.circle")
     }
-    
+
     let url: URL?
 
     var body: some View {

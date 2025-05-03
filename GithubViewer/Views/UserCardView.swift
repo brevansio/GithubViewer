@@ -13,7 +13,7 @@ struct UserCardView: View {
         static let avatarSize: CGFloat = 66
         static let lineLimit = 1
     }
-    
+
     @Environment(\.apiManager) var apiManager
 
     let user: SimpleUser
@@ -80,7 +80,7 @@ struct UserCardView: View {
             Text(currentError?.message ?? "Unknown Error")
         }
     }
-    
+
     /// Interface for calling the ``APIManager``
     private func getUserDetails() async {
         do {

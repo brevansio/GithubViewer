@@ -12,7 +12,7 @@ struct SimpleUserCell: View {
         /// The "recommended" size of a tappable item in the HIG
         static let avatarSize: CGFloat = 44
     }
-    
+
     @State var user: SimpleUser?
 
     var body: some View {

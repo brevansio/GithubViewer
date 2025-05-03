@@ -56,16 +56,16 @@ enum ValidationStatus: Equatable {  // TODO: Better naming?
 protocol APIManager {
     /// Used to test equality between two managers
     var uuid: UUID { get }
-    
+
     /// Provides a simple test of whether or not the API is working correctly
     func basicAuthentication() async throws
-    
+
     /// Returns a list of ``SimpleUser`` along with the ``URL`` for the next page of user results
     func getUserList(from pageURL: URL?) async throws -> (users: [SimpleUser], nextPage: URL?)
-    
+
     /// As there is only a single ``User`` at a time, this does not require pagination
     func getUserDetails(for user: SimpleUser) async throws -> User
-    
+
     /// Returns a list of ``Repository`` along with the ``URL`` for the next page of repository results
     func getRepositories(for user: SimpleUser, from pageURL: URL?) async throws -> (
         respositories: [Repository], nextPage: URL?

@@ -49,7 +49,7 @@ struct GithubAPIManager: APIManager {
     }
 
     let uuid = UUID()
-    
+
     /// A session specifically configured for accessing the Github REST API with an API Token
     private let authenticatedSession: URLSession
 
