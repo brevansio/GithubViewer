@@ -20,6 +20,6 @@ struct SafariView: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: UIViewControllerType, context: Context) {
-        // Nothing to do.
+        // Nothing to do
     }
 }

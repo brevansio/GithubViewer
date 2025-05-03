@@ -74,7 +74,8 @@ struct UserCardView: View {
             Text(currentError?.message ?? "Unknown Error")
         }
     }
-
+    
+    /// Interface for calling the ``APIManager``
     private func getUserDetails() async {
         do {
             guard let details = try await apiManager?.getUserDetails(for: user) else {

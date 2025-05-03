@@ -69,6 +69,7 @@ struct UserListView: View {
         }
     }
 
+    /// Interface for calling the ``APIManager``
     private func populateUsers(from pageURL: URL? = nil) async {
         do {
             guard let results = try await apiManager?.getUserList(from: pageURL) else {
@@ -86,6 +87,9 @@ struct UserListView: View {
         }
     }
 
+    /// Determines if we should fetch additional users
+    ///
+    /// Based on whether there are additional users to fetch and distance from the end of the array
     private func shouldLoadAdditionalUsers(currentUser: SimpleUser) -> Bool {
         guard nextPage != nil else { return false }
         guard let userList else { return false }
