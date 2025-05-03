@@ -37,11 +37,6 @@ struct UserListView: View {
                         }
                     }
                 }
-                .refreshable {
-                    self.userList = nil
-                    nextPage = nil
-                    Task { await populateUsers() }
-                }
             } else {
                 List {
                     ForEach(0..<20) { fakeId in
@@ -53,6 +48,11 @@ struct UserListView: View {
                     Task { await populateUsers() }
                 }
             }
+        }
+        .refreshable {
+            self.userList = nil
+            nextPage = nil
+            Task { await populateUsers() }
         }
         .alert(.init(stringLiteral: "Network Error"), isPresented: $shouldShowError) {
             if userList?.isEmpty ?? true {
