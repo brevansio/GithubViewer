@@ -45,7 +45,7 @@ struct UserListView: View {
             } else {
                 List {
                     ForEach(0..<20) { fakeId in
-                        SimpleUserCell(user: .init(icon: nil, username: "username", id: fakeId))
+                        SimpleUserCell(user: nil)
                             .redacted(reason: .placeholder)
                     }
                 }

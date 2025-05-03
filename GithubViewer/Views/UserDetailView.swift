@@ -47,7 +47,7 @@ struct UserDetailView: View {
             } else {
                 List {
                     ForEach(0..<5) { fakeId in
-                        RepositoryCell(repository: Repository(id: fakeId, name: "Test/test", description: "A test Repo", url: URL(string: "https://github.com")!, language: "Swift", stars: 3, isForked: false))
+                        RepositoryCell(repository: nil)
                             .redacted(reason: .placeholder)
                     }
                 }

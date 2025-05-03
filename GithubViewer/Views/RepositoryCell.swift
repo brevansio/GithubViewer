@@ -8,23 +8,23 @@
 import SwiftUI
 
 struct RepositoryCell: View {
-    let repository: Repository
+    let repository: Repository?
     
     var body: some View {
         HStack {
             Image(systemName: "arrow.trianglehead.branch")
                 .font(.title)
-            VStack {
-                Text(repository.name)
+            VStack(alignment: .leading) {
+                Text(repository?.name ?? "Unknown/Unknown")
                     .font(.title2)
-                Text(repository.description ?? "")
+                Text(repository?.description ?? "")
                     .font(.caption)
             }
             Spacer()
             VStack {
-                Text(repository.language ?? "Unknown")
+                Text(repository?.language ?? "Unknown")
                     .font(.caption)
-                Text("Stars: \(repository.stars)")
+                Text("Stars: \(repository?.stars ?? 0)")
                     .font(.caption)
             }
             .layoutPriority(1)

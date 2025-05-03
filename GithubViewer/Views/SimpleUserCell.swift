@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct SimpleUserCell: View {
-    @State var user: SimpleUser
+    @State var user: SimpleUser?
     
     var body: some View {
         HStack {
-            AvatarView(url: user.icon)
+            AvatarView(url: user?.icon)
                 .frame(width: 44, height: 44)
                 .cornerRadius(22)
-            Text(user.username)
+            Text(user?.username ?? "Unknown")
                 .font(.headline)
             Spacer()
         }
