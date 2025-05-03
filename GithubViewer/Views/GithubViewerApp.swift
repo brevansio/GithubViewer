@@ -12,9 +12,6 @@ struct GithubViewerApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .onAppear {
-                    try? AuthenticationModel.clearExistingToken()
-                }
         }
     }
 }

@@ -17,6 +17,13 @@ struct UserDetailView: View {
     @State private var nextPage: URL?
     @State private var selectedRepository: Repository?
     
+    @State private var shouldShowError = false
+    @State private var currentError: GithubViewerError? {
+        didSet {
+            shouldShowError = currentError != nil
+        }
+    }
+    
     var body: some View {
         VStack {
             UserCardView(user: user)
@@ -62,6 +69,19 @@ struct UserDetailView: View {
             SafariView(url: repository.url)
                 .ignoresSafeArea()
                 .transition(.move(edge: .trailing))
+        }
+        .alert(.init(stringLiteral: "Network Error"), isPresented: $shouldShowError) {
+            if repositories?.isEmpty ?? true {
+                Button("Retry") {
+                    currentError = nil
+                    Task { await fetchRepositories() }
+                }
+            }
+            Button("OK", role: .cancel) {
+                currentError = nil
+            }
+        } message: {
+            Text(currentError?.message ?? "Unknown Error")
         }
     }
     

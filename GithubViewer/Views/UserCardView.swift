@@ -13,6 +13,13 @@ struct UserCardView: View {
     let user: SimpleUser
     
     @State private var status = LoadingStatus<User>.loading
+    @State private var shouldShowError = false
+    @State private var currentError: GithubViewerError? {
+        didSet {
+            shouldShowError = currentError != nil
+            status = .failed
+        }
+    }
     
     var body: some View {
         HStack {
@@ -24,7 +31,7 @@ struct UserCardView: View {
                     .font(.title)
                 switch status {
                 case .loaded(let detailedUser):
-                    Text(detailedUser.fullname)
+                    Text(detailedUser.fullname ?? "")
                         .font(.headline)
                         .lineLimit(2)
                 default:
@@ -56,14 +63,36 @@ struct UserCardView: View {
                 await getUserDetails()
             }
         }
+        .alert(.init(stringLiteral: "Network Error"), isPresented: $shouldShowError) {
+            Button("Retry") {
+                currentError = nil
+                status = .loading
+                Task {
+                    await getUserDetails()
+                }
+            }
+            Button("Cancel", role: .cancel) {
+                currentError = nil
+            }
+        } message: {
+            Text(currentError?.message ?? "Unknown Error")
+        }
     }
     
     private func getUserDetails() async {
-        guard let details = try? await apiManager?.getUserDetails(for: user) else {
-            status = .failed
-            return
+        do {
+            guard let details = try await apiManager?.getUserDetails(for: user) else {
+                currentError = NetworkError.invalidData
+                return
+            }
+            status = .loaded(details)
+        } catch {
+            if let knownError = error as? GithubViewerError {
+                currentError = knownError
+            } else {
+                currentError = UnknownError.unknown(error)
+            }
         }
-        status = .loaded(details)
     }
 }
 

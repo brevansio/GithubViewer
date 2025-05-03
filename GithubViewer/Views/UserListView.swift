@@ -13,38 +13,60 @@ struct UserListView: View {
     @State private var userList: [SimpleUser]?
     @State private var nextPage: URL?
     
+    @State private var shouldShowError = false
+    @State private var currentError: GithubViewerError? {
+        didSet {
+            shouldShowError = currentError != nil
+        }
+    }
+    
     var body: some View {
-        switch userList {
-        case .none:
-            List {
-                ForEach(0..<20) { fakeId in
-                    SimpleUserCell(user: .init(icon: nil, username: "username", id: fakeId))
-                        .redacted(reason: .placeholder)
-                }
-            }
-            .onAppear {
-                Task { await populateUsers() }
-            }
-        case .some(let users):
-            List(users) { user in
-                NavigationLink {
-                    UserDetailView(user: user)
-                } label: {
-                    SimpleUserCell(user: user)
-                }
-                .onAppear {
-                    if shouldLoadAdditionalUsers(currentUser: user) {
-                        let nextPageURL = nextPage
-                        Task { await populateUsers(from: nextPageURL) }
-                        nextPage = nil
+        ZStack {
+            switch userList {
+            case .none:
+                List {
+                    ForEach(0..<20) { fakeId in
+                        SimpleUserCell(user: .init(icon: nil, username: "username", id: fakeId))
+                            .redacted(reason: .placeholder)
                     }
                 }
+                .onAppear {
+                    Task { await populateUsers() }
+                }
+            case .some(let users):
+                List(users) { user in
+                    NavigationLink {
+                        UserDetailView(user: user)
+                    } label: {
+                        SimpleUserCell(user: user)
+                    }
+                    .onAppear {
+                        if shouldLoadAdditionalUsers(currentUser: user) {
+                            let nextPageURL = nextPage
+                            Task { await populateUsers(from: nextPageURL) }
+                            nextPage = nil
+                        }
+                    }
+                }
+                .refreshable {
+                    userList = nil
+                    nextPage = nil
+                    Task { await populateUsers() }
+                }
             }
-            .refreshable {
-                userList = nil
-                nextPage = nil
-                Task { await populateUsers() }
+        }
+        .alert(.init(stringLiteral: "Network Error"), isPresented: $shouldShowError) {
+            if userList?.isEmpty ?? true {
+                Button("Retry") {
+                    currentError = nil
+                    Task { await populateUsers() }
+                }
             }
+            Button("OK", role: .cancel) {
+                currentError = nil
+            }
+        } message: {
+            Text(currentError?.message ?? "Unknown Error")
         }
     }
     
@@ -57,7 +79,11 @@ struct UserListView: View {
             userList = (userList ?? []) + results.users
             nextPage = results.nextPage
         } catch {
-            print(error)
+            if let knownError = error as? GithubViewerError {
+                currentError = knownError
+            } else {
+                currentError = UnknownError.unknown(error)
+            }
         }
     }
     

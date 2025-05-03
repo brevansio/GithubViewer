@@ -10,7 +10,7 @@ import Foundation
 struct User: Codable {
     let icon: URL?
     let username: String
-    let fullname: String
+    let fullname: String?
     let followerCount: UInt
     let followingCount: UInt
     
