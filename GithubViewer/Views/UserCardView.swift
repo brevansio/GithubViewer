@@ -34,7 +34,7 @@ struct UserCardView: View {
                         .lineLimit(2)
                 } else {
                     Text("Full Name")
-                        .font(.headline)
+                        .font(.subheadline)
                         .redacted(reason: .placeholder)
                 }
             }
