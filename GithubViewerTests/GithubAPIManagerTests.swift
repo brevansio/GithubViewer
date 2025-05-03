@@ -6,8 +6,9 @@
 //
 
 import Foundation
-@testable import GithubViewer
 import Testing
+
+@testable import GithubViewer
 
 // Note: These are for development. They will not run correctly as Unit Tests.
 // To run, replace the `"abcd"` token with a real token, and run.
@@ -16,7 +17,7 @@ struct GithubAPIManagerTests {
         let authentication = try! AuthenticationModel(token: "abcd")
         return GithubAPIManager(with: authentication)
     }()
-    
+
     /*
     @Test
     func basicAuthentication() async throws {
@@ -32,7 +33,7 @@ struct GithubAPIManagerTests {
     @Test
     func userDetails() async throws {
         let testUser = SimpleUser(icon: nil, username: "brevansio", id: 0)
-        
+    
         let user = try await apiManager.getUserDetails(for: testUser)
         #expect(user.username == "brevansio")
     }
@@ -40,7 +41,7 @@ struct GithubAPIManagerTests {
     @Test
     func repositoryList() async throws {
         let testUser = SimpleUser(icon: nil, username: "brevansio", id: 0)
-        
+    
         let repositoryList = try await apiManager.getRepositories(for: testUser)
         #expect(!repositoryList.respositories.isEmpty)
     }

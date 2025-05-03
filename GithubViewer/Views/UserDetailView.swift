@@ -10,20 +10,20 @@ import SwiftUI
 
 struct UserDetailView: View {
     @Environment(\.apiManager) var apiManager
-    
+
     let user: SimpleUser
-    
+
     @State private var repositories: [Repository]?
     @State private var nextPage: URL?
     @State private var selectedRepository: Repository?
-    
+
     @State private var shouldShowError = false
     @State private var currentError: GithubViewerError? {
         didSet {
             shouldShowError = currentError != nil
         }
     }
-    
+
     var body: some View {
         VStack {
             UserCardView(user: user)
@@ -62,7 +62,7 @@ struct UserDetailView: View {
             repositories = nil
             nextPage = nil
             Task { await fetchRepositories() }
-            
+
         }
         .fullScreenCover(item: $selectedRepository) { repository in
             SafariView(url: repository.url)
@@ -83,21 +83,21 @@ struct UserDetailView: View {
             Text(currentError?.message ?? "Unknown Error")
         }
     }
-    
+
     private func fetchRepositories(from pageURL: URL? = nil) async {
         do {
             guard let results = try await apiManager?.getRepositories(for: user, from: pageURL) else {
                 repositories = []
                 return
             }
-            
+
             repositories = (repositories ?? []) + results.respositories.filter { !$0.isForked }
             nextPage = results.nextPage
         } catch {
             print(error)
         }
     }
-    
+
     private func shouldLoadAdditionalRepositories(currentRepository: Repository) -> Bool {
         guard nextPage != nil else { return false }
         guard let repositories else { return false }
@@ -108,7 +108,7 @@ struct UserDetailView: View {
 
 #Preview {
     UserDetailView(user: SimpleUser(icon: nil, username: "TestUser", id: 1))
-#if DEBUG && targetEnvironment(simulator)
-        .environment(\.apiManager, MockedAPIManager())
-#endif
+        #if DEBUG && targetEnvironment(simulator)
+            .environment(\.apiManager, MockedAPIManager())
+        #endif
 }

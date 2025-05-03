@@ -12,20 +12,20 @@ enum NetworkError: GithubViewerError {
     case server(status: Int)
     case genericConnection(status: Int)
     case invalidData
-    
+
     var message: String {
         switch self {
-        case .authentication(status: let status):
+        case .authentication(let status):
             "Authentication failed with status code: \(status)"
-        case .server(status: let status):
+        case .server(let status):
             "The server failed to handle the request with status code: \(status). Please wait a while and try again."
-        case .genericConnection(status: let status):
+        case .genericConnection(let status):
             "There was a network failure with status code: \(status). Please wait a while and try again"
         case .invalidData:
             "The server responded with malformed data."
         }
     }
-    
+
     var isIgnorable: Bool { false }
     var isRecoverable: Bool { false }
 }
@@ -34,7 +34,7 @@ enum ValidationStatus: Equatable {  // TODO: Better naming?
     case invalid
     case validating
     case valid(APIManager)
-    
+
     static func == (lhs: ValidationStatus, rhs: ValidationStatus) -> Bool {
         switch (lhs, rhs) {
         case (.invalid, .invalid), (.validating, .validating):
@@ -53,7 +53,9 @@ protocol APIManager {
     func basicAuthentication() async throws
     func getUserList(from pageURL: URL?) async throws -> (users: [SimpleUser], nextPage: URL?)
     func getUserDetails(for user: SimpleUser) async throws -> User
-    func getRepositories(for user: SimpleUser, from pageURL: URL?) async throws -> (respositories: [Repository], nextPage: URL?)
+    func getRepositories(for user: SimpleUser, from pageURL: URL?) async throws -> (
+        respositories: [Repository], nextPage: URL?
+    )
 }
 
 // Note: Due to how `Equatable` works on Protocols, the above `ValidationStatus` won't compile since we are using
