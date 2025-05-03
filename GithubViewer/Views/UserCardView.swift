@@ -8,6 +8,12 @@
 import SwiftUI
 
 struct UserCardView: View {
+    private enum Design {
+        /// The "recommended" tappable item, but a little zoomed in
+        static let avatarSize: CGFloat = 66
+        static let lineLimit = 1
+    }
+    
     @Environment(\.apiManager) var apiManager
 
     let user: SimpleUser
@@ -23,15 +29,15 @@ struct UserCardView: View {
     var body: some View {
         HStack {
             AvatarView(url: user.icon)
-                .frame(width: 66, height: 66)
-                .cornerRadius(44)
+                .frame(width: Design.avatarSize, height: Design.avatarSize)
+                .cornerRadius(Design.avatarSize / 2)
             VStack(alignment: .leading) {
                 Text(user.username)
                     .font(.title)
                 if let detailedUser {
                     Text(detailedUser.fullname ?? "")
                         .font(.headline)
-                        .lineLimit(2)
+                        .lineLimit(Design.lineLimit)
                 } else {
                     Text("Full Name")
                         .font(.subheadline)
