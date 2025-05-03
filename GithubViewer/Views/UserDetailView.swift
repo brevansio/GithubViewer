@@ -108,5 +108,7 @@ struct UserDetailView: View {
 
 #Preview {
     UserDetailView(user: SimpleUser(icon: nil, username: "TestUser", id: 1))
+#if DEBUG && targetEnvironment(simulator)
         .environment(\.apiManager, MockedAPIManager())
+#endif
 }

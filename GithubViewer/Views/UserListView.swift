@@ -96,5 +96,7 @@ struct UserListView: View {
 
 #Preview {
     UserListView()
+#if DEBUG && targetEnvironment(simulator)
         .environment(\.apiManager, MockedAPIManager())
+#endif
 }

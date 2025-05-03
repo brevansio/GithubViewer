@@ -129,6 +129,8 @@ struct FollowerView: View {
 
 #Preview {
     UserCardView(user: SimpleUser(icon: nil, username: "Test", id: 1))
+#if DEBUG && targetEnvironment(simulator)
         .environment(\.apiManager, MockedAPIManager())
+#endif
 }
 
