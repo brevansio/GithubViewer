@@ -63,14 +63,12 @@ struct GithubAPIManager: APIManager {
         
         switch httpResponse.statusCode {
         case 200..<300:
-            
             // Get the next page from the link header
             guard let linkHeader = httpResponse.value(forHTTPHeaderField: "link"),
                   let nextRegex = try? Regex("<([^>]+)>; rel=\"[N,n]ext\""),   // Base Regex provided in Github Documentation
                   let nextPageURL = linkHeader.firstMatch(of: nextRegex)?.last?.substring else {
                 return APIData(data: response.0, nextPage: nil)
             }
-            
             return APIData(data: response.0, nextPage: URL(string: String(nextPageURL)))
         case 400..<500:
             throw NetworkError.authentication(status: httpResponse.statusCode)

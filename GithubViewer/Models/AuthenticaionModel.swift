@@ -8,9 +8,36 @@
 import Foundation
 import RegexBuilder
 
-enum AuthenticationError: Error {
+enum AuthenticationError: GithubViewerError {
     case invalidFormat
     case keychainFailure
+    
+    var message: String {
+        switch self {
+        case .invalidFormat:
+            "The token does not appear to be in the correct format. Please use Github Private API Tokens."
+        case .keychainFailure:
+            "Failed to save the token to the keychain. Continue without saving?\nNote: The app will continue to work, but you will need to reenter your token next time you launch the app."
+        }
+    }
+    
+    var isRecoverable: Bool {
+        switch self {
+        case .invalidFormat:
+            true
+        case .keychainFailure:
+            false
+        }
+    }
+    
+    var isIgnorable: Bool {
+        switch self {
+        case .invalidFormat:
+            true
+        case .keychainFailure:
+            true
+        }
+    }
 }
 
 struct AuthenticationModel: Sendable {
@@ -19,16 +46,22 @@ struct AuthenticationModel: Sendable {
     
     let token: String
     
-    init(token: String? = nil) throws {
+    init(token: String? = nil, ignoreFormatErrors: Bool = false) throws {
         let regex = try Regex("^github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59}$")
         let legacyRegex = try Regex("^ghp_[a-zA-Z0-9]{36,40}$")
         
         if let token,
            !token.isEmpty {
-            // TODO: Split the Regexes Apart. We can show a helpful message about upgrading the "Classic" tokens
-            guard let _ = try regex.wholeMatch(in: token) ?? legacyRegex.wholeMatch(in: token) else {
-                throw AuthenticationError.invalidFormat
+            
+            // Allow the user to skip formatting errors. This could be helpful if the API Token is in a legitimate,
+            // but unknown format.
+            if !ignoreFormatErrors {
+                // TODO: Split the Regexes Apart. We can show a helpful message about upgrading the "Classic" tokens
+                guard let _ = try regex.wholeMatch(in: token) ?? legacyRegex.wholeMatch(in: token) else {
+                    throw AuthenticationError.invalidFormat
+                }
             }
+            
             self.token = token
         } else {
             let query = [
@@ -53,7 +86,7 @@ struct AuthenticationModel: Sendable {
         }
     }
     
-    func persist() throws {
+    func persist(igoreErrors: Bool = false) throws {
         guard let tokenData = token.data(using: .utf8) else { throw AuthenticationError.invalidFormat }
         let query = [
             kSecClass: kSecClassKey,
@@ -62,7 +95,9 @@ struct AuthenticationModel: Sendable {
         ] as CFDictionary
         
         if SecItemAdd(query, nil) != errSecSuccess {
-            throw AuthenticationError.keychainFailure
+            if !igoreErrors {
+                throw AuthenticationError.keychainFailure
+            }
         }
     }
     

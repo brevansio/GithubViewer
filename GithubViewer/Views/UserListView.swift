@@ -50,7 +50,7 @@ struct UserListView: View {
     
     private func populateUsers(from pageURL: URL? = nil) async {
         do {
-            guard let results = try await apiManager?.getUserList(from: pageURL) else {   // TODO: Losing the error is bad?
+            guard let results = try await apiManager?.getUserList(from: pageURL) else {
                 userList = []
                 return
             }
