@@ -9,7 +9,6 @@ import Foundation
 
 protocol GithubViewerError: Error {
     var message: String { get }
-    var isRecoverable: Bool { get }
     var isIgnorable: Bool { get }
 }
 

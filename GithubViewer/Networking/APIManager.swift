@@ -27,7 +27,6 @@ enum NetworkError: GithubViewerError {
     }
 
     var isIgnorable: Bool { false }
-    var isRecoverable: Bool { false }
 }
 
 enum ValidationStatus: Equatable {  // TODO: Better naming?

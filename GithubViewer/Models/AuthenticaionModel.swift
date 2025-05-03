@@ -21,15 +21,6 @@ enum AuthenticationError: GithubViewerError {
         }
     }
 
-    var isRecoverable: Bool {
-        switch self {
-        case .invalidFormat:
-            true
-        case .keychainFailure:
-            false
-        }
-    }
-
     var isIgnorable: Bool {
         switch self {
         case .invalidFormat:
