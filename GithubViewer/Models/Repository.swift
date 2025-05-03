@@ -26,3 +26,9 @@ struct Repository: Codable, Identifiable {
         case isForked = "fork"
     }
 }
+
+extension Repository: Equatable {
+    static func == (lhs: Repository, rhs: Repository) -> Bool {
+        lhs.id == rhs.id
+    }
+}

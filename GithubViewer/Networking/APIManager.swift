@@ -35,9 +35,9 @@ enum ValidationStatus: Equatable {  // TODO: Better naming?
 protocol APIManager {
     var uuid: UUID { get }
     func basicAuthentication() async throws
-    func getUserList() async throws -> [SimpleUser]
+    func getUserList(from pageURL: URL?) async throws -> (users: [SimpleUser], nextPage: URL?)
     func getUserDetails(for user: SimpleUser) async throws -> User
-    func getRepositories(for user: SimpleUser) async throws -> [Repository]
+    func getRepositories(for user: SimpleUser, from pageURL: URL?) async throws -> (respositories: [Repository], nextPage: URL?)
 }
 
 // Note: Due to how `Equatable` works on Protocols, the above `ValidationStatus` won't compile since we are using

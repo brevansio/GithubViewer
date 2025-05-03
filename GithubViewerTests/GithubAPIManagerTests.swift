@@ -9,40 +9,40 @@ import Foundation
 @testable import GithubViewer
 import Testing
 
+// Note: These are for development. They will not run correctly as Unit Tests.
+// To run, replace the `"abcd"` token with a real token, and run.
 struct GithubAPIManagerTests {
-
+    let apiManager = {
+        let authentication = try! AuthenticationModel(token: "abcd")
+        return GithubAPIManager(with: authentication)
+    }()
+    
+    /*
     @Test
     func basicAuthentication() async throws {
-        let authentication = AuthenticationModel(token: "abcd")!
-        
-        let success = try await GithubAPIManager.basicAuthentication(with: authentication)
-        #expect(success != false)
+        try await apiManager.basicAuthentication()
     }
     
     @Test
     func userList() async throws {
-        let authentication = AuthenticationModel(token: "abcd")!
-        
-        let userList = try await GithubAPIManager.getUserList(with: authentication)
-        #expect(userList != nil)
+        let userList = try await apiManager.getUserList()
+        #expect(!userList.users.isEmpty)
     }
     
     @Test
     func userDetails() async throws {
-        let authentication = AuthenticationModel(token: "abcd")!
-        let testUser = SimpleUser(icon: URL("https://google.com")!, username: "brevansio", id: 0)
+        let testUser = SimpleUser(icon: nil, username: "brevansio", id: 0)
         
-        let user = try await GithubAPIManager.getUserDetails(for: testUser, with: authentication)
-        #expect(user != nil)
+        let user = try await apiManager.getUserDetails(for: testUser)
+        #expect(user.username == "brevansio")
     }
     
     @Test
     func repositoryList() async throws {
-        let authentication = AuthenticationModel(token: "abcd")!
-        let testUser = SimpleUser(icon: URL("https://google.com")!, username: "brevansio", id: 0)
+        let testUser = SimpleUser(icon: nil, username: "brevansio", id: 0)
         
-        let repositoryList = try await GithubAPIManager.getRepositories(for: testUser, with: authentication)
-        #expect(repositoryList != nil)
+        let repositoryList = try await apiManager.getRepositories(for: testUser)
+        #expect(!repositoryList.respositories.isEmpty)
     }
-    
+     */
 }

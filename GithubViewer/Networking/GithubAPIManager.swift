@@ -13,10 +13,11 @@ struct GithubAPIManager: APIManager {
         case userList
         case user(String)
         case repositoryList(String)
+        case nextPage(URL)
         
         private static let baseEndpoint = URL(string: "https://api.github.com/")! // Note: Known URL
 
-        var endpoint: URL {
+        var url: URL {
             let endpointExtention: String
             switch self {
             case .authentication:
@@ -27,9 +28,16 @@ struct GithubAPIManager: APIManager {
                 endpointExtention = "users/\(username)"
             case .repositoryList(let username):
                 endpointExtention = "users/\(username)/repos"
+            case .nextPage(let pageURL):
+                return pageURL
             }
             return APIEndpoints.baseEndpoint.appendingPathComponent(endpointExtention)
         }
+    }
+    
+    private struct APIData {
+        let data: Data
+        let nextPage: URL?
     }
     
     let uuid = UUID()
@@ -47,7 +55,7 @@ struct GithubAPIManager: APIManager {
         authenticatedSession = URLSession(configuration: configuration)
     }
     
-    private func performRequest(to endpoint: URL) async throws -> Data {
+    private func performRequest(to endpoint: URL) async throws -> APIData {
         let response = try await authenticatedSession.data(from: endpoint)
         guard let httpResponse = response.1 as? HTTPURLResponse else {
             throw NetworkError.invalidData
@@ -55,7 +63,15 @@ struct GithubAPIManager: APIManager {
         
         switch httpResponse.statusCode {
         case 200..<300:
-            return response.0
+            
+            // Get the next page from the link header
+            guard let linkHeader = httpResponse.value(forHTTPHeaderField: "link"),
+                  let nextRegex = try? Regex("<([^>]+)>; rel=\"[N,n]ext\""),   // Base Regex provided in Github Documentation
+                  let nextPageURL = linkHeader.firstMatch(of: nextRegex)?.last?.substring else {
+                return APIData(data: response.0, nextPage: nil)
+            }
+            
+            return APIData(data: response.0, nextPage: URL(string: String(nextPageURL)))
         case 400..<500:
             throw NetworkError.authentication(status: httpResponse.statusCode)
         case 500..<600:
@@ -66,26 +82,38 @@ struct GithubAPIManager: APIManager {
     }
     
     func basicAuthentication() async throws {
-        let _ = try await performRequest(to: APIEndpoints.authentication.endpoint)
+        let _ = try await performRequest(to: APIEndpoints.authentication.url)
         return
     }
     
-    func getUserList() async throws -> [SimpleUser] {
-        let responseData = try await performRequest(to: APIEndpoints.userList.endpoint)
-        return try JSONDecoder().decode([SimpleUser].self, from: responseData)
+    func getUserList(from pageURL: URL? = nil) async throws -> (users: [SimpleUser], nextPage: URL?) {
+        let endpoint: APIEndpoints
+        if let pageURL {
+            endpoint = .nextPage(pageURL)
+        } else {
+            endpoint = .userList
+        }
         
-        // TODO: Handle Pagination
+        let responseData = try await performRequest(to: endpoint.url)
+        let userList = try JSONDecoder().decode([SimpleUser].self, from: responseData.data)
+        return (userList, responseData.nextPage)
     }
     
     func getUserDetails(for user: SimpleUser) async throws -> User {
-        let responseData = try await performRequest(to: APIEndpoints.user(user.username).endpoint)
-        return try JSONDecoder().decode(User.self, from: responseData)
+        let responseData = try await performRequest(to: APIEndpoints.user(user.username).url)
+        return try JSONDecoder().decode(User.self, from: responseData.data)
     }
     
-    func getRepositories(for user: SimpleUser) async throws -> [Repository] {
-        let responseData = try await performRequest(to: APIEndpoints.repositoryList(user.username).endpoint)
-        return try JSONDecoder().decode([Repository].self, from: responseData)
+    func getRepositories(for user: SimpleUser, from pageURL: URL? = nil) async throws -> (respositories: [Repository], nextPage: URL?) {
+        let endpoint: APIEndpoints
+        if let pageURL {
+            endpoint = .nextPage(pageURL)
+        } else {
+            endpoint = .userList
+        }
         
-        // TODO: Handle Pagination
+        let responseData = try await performRequest(to: APIEndpoints.repositoryList(user.username).url)
+        let repositoryList = try JSONDecoder().decode([Repository].self, from: responseData.data)
+        return (repositoryList, responseData.nextPage)
     }
 }

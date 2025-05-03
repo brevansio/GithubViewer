@@ -18,3 +18,9 @@ struct SimpleUser: Codable, Identifiable {
         case id
     }
 }
+
+extension SimpleUser: Equatable {
+    static func == (lhs: SimpleUser, rhs: SimpleUser) -> Bool {
+        lhs.id == rhs.id
+    }
+}
