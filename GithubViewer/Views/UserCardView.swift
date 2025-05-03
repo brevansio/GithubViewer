@@ -12,12 +12,11 @@ struct UserCardView: View {
     
     let user: SimpleUser
     
-    @State private var status = LoadingStatus<User>.loading
+    @State private var detailedUser: User?
     @State private var shouldShowError = false
     @State private var currentError: GithubViewerError? {
         didSet {
             shouldShowError = currentError != nil
-            status = .failed
         }
     }
     
@@ -29,30 +28,30 @@ struct UserCardView: View {
             VStack(alignment: .leading) {
                 Text(user.username)
                     .font(.title)
-                switch status {
-                case .loaded(let detailedUser):
+                switch detailedUser {
+                case .none:
+                    Text("Full Name")
+                        .font(.headline)
+                        .redacted(reason: .placeholder)
+                case .some(let detailedUser):
                     Text(detailedUser.fullname ?? "")
                         .font(.headline)
                         .lineLimit(2)
-                default:
-                    Text("Status Message")
-                        .font(.headline)
-                        .redacted(reason: .placeholder)
                 }
             }
             Spacer()
             HStack {
-                switch status {
-                case .loaded(let detailedUser):
-                    FollowerView(followType: .following(detailedUser.followingCount))
-                    Text("/")
-                    FollowerView(followType: .followers(detailedUser.followerCount))
-                default:
+                switch detailedUser {
+                case .none:
                     FollowerView(followType: .following(99))
                         .redacted(reason: .placeholder)
                     Text("/")
                     FollowerView(followType: .followers(99))
                         .redacted(reason: .placeholder)
+                case .some(let detailedUser):
+                    FollowerView(followType: .following(detailedUser.followingCount))
+                    Text("/")
+                    FollowerView(followType: .followers(detailedUser.followerCount))
                 }
             }
             .layoutPriority(1)
@@ -66,7 +65,6 @@ struct UserCardView: View {
         .alert(.init(stringLiteral: "Network Error"), isPresented: $shouldShowError) {
             Button("Retry") {
                 currentError = nil
-                status = .loading
                 Task {
                     await getUserDetails()
                 }
@@ -85,7 +83,7 @@ struct UserCardView: View {
                 currentError = NetworkError.invalidData
                 return
             }
-            status = .loaded(details)
+            detailedUser = details
         } catch {
             if let knownError = error as? GithubViewerError {
                 currentError = knownError
